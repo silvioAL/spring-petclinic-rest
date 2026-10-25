@@ -105,4 +105,28 @@ class VaccineSegurancaRestControllerV1Tests {
             .andExpect(status().isForbidden());
     }
 
+    // @verifica: CT-022
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    @DisplayName("RN-002 · segurança ligada sem o papel VET_ADMIN devolve 403")
+    void registrarVacinaComSegurancaLigadaSemOPapelVetAdminDevolve403() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+        String corpo = """
+            {"name": "V10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento);
+
+        MockMvc mockMvcComSeguranca = MockMvcBuilders.webAppContextSetup(context)
+            .apply(springSecurity())
+            .build();
+
+        mockMvcComSeguranca.perform(post("/api/pets/3/vaccines")
+                .content(corpo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
+    }
+
 }
