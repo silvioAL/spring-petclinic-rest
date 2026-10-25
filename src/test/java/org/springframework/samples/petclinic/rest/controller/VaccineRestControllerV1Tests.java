@@ -129,4 +129,37 @@ class VaccineRestControllerV1Tests {
         }
     }
 
+    // @verifica: CT-004
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    @DisplayName("RN-002 · falta da data de aplicação ou do vencimento é recusada com 400 no campo")
+    void registrarVacinaSemDataDeAplicacaoOuSemVencimentoDevolve400NoCampo() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+
+        String semAplicacao = """
+            {"name": "V10", "expirationDate": "%s"}
+            """.formatted(vencimento);
+
+        this.mockMvc.perform(post("/api/pets/3/vaccines")
+                .content(semAplicacao)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("applicationDate")));
+
+        String semVencimento = """
+            {"name": "V10", "applicationDate": "%s"}
+            """.formatted(aplicacao);
+
+        this.mockMvc.perform(post("/api/pets/3/vaccines")
+                .content(semVencimento)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("expirationDate")));
+    }
+
 }
