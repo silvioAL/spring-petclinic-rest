@@ -247,4 +247,39 @@ class VaccineRestControllerV1Tests {
             .andExpect(status().isNotFound());
     }
 
+    // @verifica: CT-009
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    @DisplayName("RN-002 · V10 e v-10 no mesmo pet geram dois registros com o mesmo nome normalizado")
+    void registrarV10EDepoisV10ComHifenNoMesmoPetGeraDoisRegistros() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+        String primeiro = """
+            {"name": "V10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento);
+        String segundo = """
+            {"name": "v-10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento.plusDays(30));
+
+        // a revacinacao (mesmo nome normalizado) nao e recusada nem altera o registro anterior;
+        // o nome digitado de cada registro e preservado para exibicao (C4, C5)
+        this.mockMvc.perform(post("/api/pets/3/vaccines")
+                .content(primeiro)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.petId").value(3))
+            .andExpect(jsonPath("$.name").value("V10"));
+
+        this.mockMvc.perform(post("/api/pets/3/vaccines")
+                .content(segundo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.petId").value(3))
+            .andExpect(jsonPath("$.name").value("v-10"));
+    }
+
 }
