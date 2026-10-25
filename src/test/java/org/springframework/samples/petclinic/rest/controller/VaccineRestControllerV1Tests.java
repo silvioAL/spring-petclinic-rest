@@ -162,4 +162,25 @@ class VaccineRestControllerV1Tests {
             .andExpect(content().string(containsString("expirationDate")));
     }
 
+    // @verifica: CT-005
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    @DisplayName("RN-002 · vencimento anterior à aplicação é recusado com 400 no vencimento")
+    void registrarVacinaComVencimentoAnteriorAAplicacaoDevolve400NoVencimento() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = aplicacao.minusDays(1);
+        String corpo = """
+            {"name": "V10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento);
+
+        this.mockMvc.perform(post("/api/pets/3/vaccines")
+                .content(corpo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("expirationDate")));
+    }
+
 }
