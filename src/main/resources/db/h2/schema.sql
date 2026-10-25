@@ -59,6 +59,18 @@ CREATE TABLE IF NOT EXISTS visits (
   FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS vaccines (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  pet_id INTEGER NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  normalized_name VARCHAR(255) NOT NULL,
+  application_date DATE NOT NULL,
+  expiration_date DATE NOT NULL,
+  FOREIGN KEY (pet_id) REFERENCES pets(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_vaccines_pet_name_expiration ON vaccines(pet_id, normalized_name, expiration_date);
+
 CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(20) NOT NULL PRIMARY KEY,
   password VARCHAR(255) NOT NULL,

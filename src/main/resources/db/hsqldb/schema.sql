@@ -1,3 +1,4 @@
+DROP TABLE vaccines IF EXISTS;
 DROP TABLE vet_specialties IF EXISTS;
 DROP TABLE vets IF EXISTS;
 DROP TABLE specialties IF EXISTS;
@@ -64,6 +65,17 @@ CREATE TABLE visits (
 );
 ALTER TABLE visits ADD CONSTRAINT fk_visits_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
 CREATE INDEX visits_pet_id ON visits (pet_id);
+
+CREATE TABLE vaccines (
+  id               INTEGER IDENTITY PRIMARY KEY,
+  pet_id           INTEGER NOT NULL,
+  name             VARCHAR(255) NOT NULL,
+  normalized_name  VARCHAR(255) NOT NULL,
+  application_date DATE NOT NULL,
+  expiration_date  DATE NOT NULL
+);
+ALTER TABLE vaccines ADD CONSTRAINT fk_vaccines_pets FOREIGN KEY (pet_id) REFERENCES pets (id);
+CREATE INDEX vaccines_pet_name_expiration ON vaccines (pet_id, normalized_name, expiration_date);
 
 CREATE  TABLE users (
   username    VARCHAR(20) NOT NULL ,

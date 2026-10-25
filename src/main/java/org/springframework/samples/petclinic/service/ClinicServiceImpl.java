@@ -44,6 +44,7 @@ public class ClinicServiceImpl implements ClinicService {
     private final VetRepository vetRepository;
     private final OwnerRepository ownerRepository;
     private final VisitRepository visitRepository;
+    private final VaccineRepository vaccineRepository;
     private final SpecialtyRepository specialtyRepository;
     private final PetTypeRepository petTypeRepository;
 
@@ -52,12 +53,14 @@ public class ClinicServiceImpl implements ClinicService {
         VetRepository vetRepository,
         OwnerRepository ownerRepository,
         VisitRepository visitRepository,
+        VaccineRepository vaccineRepository,
         SpecialtyRepository specialtyRepository,
         PetTypeRepository petTypeRepository) {
         this.petRepository = petRepository;
         this.vetRepository = vetRepository;
         this.ownerRepository = ownerRepository;
         this.visitRepository = visitRepository;
+        this.vaccineRepository = vaccineRepository;
         this.specialtyRepository = specialtyRepository;
         this.petTypeRepository = petTypeRepository;
     }
@@ -77,6 +80,10 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     @Transactional
     public void deletePet(Pet pet) throws DataAccessException {
+        // RN-022: the vaccines of the pet go first, in the same transaction, before the visits and the pet
+        if (pet.getId() != null) {
+            vaccineRepository.deleteByPetId(pet.getId());
+        }
         petRepository.delete(pet);
     }
 
@@ -96,6 +103,12 @@ public class ClinicServiceImpl implements ClinicService {
     @Transactional
     public void deleteVisit(Visit visit) throws DataAccessException {
         visitRepository.delete(visit);
+    }
+
+    @Override
+    @Transactional
+    public void saveVaccine(Vaccine vaccine) throws DataAccessException {
+        vaccineRepository.save(vaccine);
     }
 
     @Override
@@ -140,6 +153,10 @@ public class ClinicServiceImpl implements ClinicService {
     @Override
     @Transactional
     public void deleteOwner(Owner owner) throws DataAccessException {
+        // RN-019: the vaccines of every pet of the owner go first, in the same transaction, with visits and pets
+        if (owner.getId() != null) {
+            vaccineRepository.deleteByOwnerId(owner.getId());
+        }
         ownerRepository.delete(owner);
     }
 
