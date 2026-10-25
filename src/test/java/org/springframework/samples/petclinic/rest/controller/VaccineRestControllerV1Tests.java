@@ -227,4 +227,24 @@ class VaccineRestControllerV1Tests {
             .andExpect(content().string(containsString("applicationDate")));
     }
 
+    // @verifica: CT-008
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    @DisplayName("RN-023 · registro para pet inexistente é recusado com 404")
+    void registrarVacinaParaPetInexistenteDevolve404() throws Exception {
+        given(this.clinicService.findPetById(999)).willReturn(null);
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+        String corpo = """
+            {"name": "V10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento);
+
+        this.mockMvc.perform(post("/api/pets/999/vaccines")
+                .content(corpo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+    }
+
 }
