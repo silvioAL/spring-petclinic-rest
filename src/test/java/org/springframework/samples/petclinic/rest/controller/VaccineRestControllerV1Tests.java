@@ -21,8 +21,10 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -100,6 +102,31 @@ class VaccineRestControllerV1Tests {
             .andExpect(jsonPath("$.petId").value(3))
             .andExpect(jsonPath("$.applicationDate").value(aplicacao.toString()))
             .andExpect(jsonPath("$.expirationDate").value(vencimento.toString()));
+    }
+
+    // @verifica: CT-003
+    @Test
+    @WithMockUser(roles = "VET_ADMIN")
+    @DisplayName("RN-005 · nome vazio ou só com espaços e hífen é recusado com 400 no nome")
+    void registrarVacinaComNomeVazioOuSoEspacosEHifenDevolve400NoNome() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+        String[] nomesInvalidos = {"", "   ", "-", " - - "};
+
+        for (String nome : nomesInvalidos) {
+            String corpo = """
+                {"name": "%s", "applicationDate": "%s", "expirationDate": "%s"}
+                """.formatted(nome, aplicacao, vencimento);
+
+            this.mockMvc.perform(post("/api/pets/3/vaccines")
+                    .content(corpo)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("name")));
+        }
     }
 
 }
