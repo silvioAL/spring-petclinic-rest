@@ -22,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDate;
 
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +79,30 @@ class VaccineSegurancaRestControllerV1Tests {
             .andExpect(jsonPath("$.name").value("V10"))
             .andExpect(jsonPath("$.applicationDate").value(aplicacao.toString()))
             .andExpect(jsonPath("$.expirationDate").value(vencimento.toString()));
+    }
+
+    // @verifica: CT-012
+    @Test
+    @WithMockUser(roles = "OWNER_ADMIN")
+    @DisplayName("RN-002 · segurança ligada com OWNER_ADMIN sem VET_ADMIN recebe 403")
+    void registrarVacinaComSegurancaLigadaSemVetAdminDevolve403() throws Exception {
+        given(this.clinicService.findPetById(3)).willReturn(petMapper.toPet(pet));
+
+        LocalDate aplicacao = LocalDate.now().minusDays(10);
+        LocalDate vencimento = LocalDate.now().plusDays(355);
+        String corpo = """
+            {"name": "V10", "applicationDate": "%s", "expirationDate": "%s"}
+            """.formatted(aplicacao, vencimento);
+
+        MockMvc mockMvcComSeguranca = MockMvcBuilders.webAppContextSetup(context)
+            .apply(springSecurity())
+            .build();
+
+        mockMvcComSeguranca.perform(post("/api/pets/3/vaccines")
+                .content(corpo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isForbidden());
     }
 
 }
