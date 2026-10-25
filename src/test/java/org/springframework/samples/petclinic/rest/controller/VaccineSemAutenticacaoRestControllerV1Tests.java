@@ -21,6 +21,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.time.LocalDate;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -72,6 +73,28 @@ class VaccineSemAutenticacaoRestControllerV1Tests {
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isUnauthorized());
+    }
+
+    // @verifica: CT-021
+    @Test
+    @DisplayName("RN-004 · segurança ligada sem autenticação devolve 401 e não chega ao caso de uso")
+    void registrarVacinaSemAutenticacaoDevolve401SemTocarNoPet() throws Exception {
+        LocalDate aplicacao = LocalDate.now().minusDays(5);
+        LocalDate vencimento = LocalDate.now().plusDays(360);
+        String corpo = "{\"name\": \"Antirrabica\", \"applicationDate\": \"%s\", \"expirationDate\": \"%s\"}"
+            .formatted(aplicacao, vencimento);
+
+        MockMvc mockMvcComSeguranca = MockMvcBuilders.webAppContextSetup(context)
+            .apply(springSecurity())
+            .build();
+
+        mockMvcComSeguranca.perform(post("/api/pets/3/vaccines")
+                .content(corpo)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isUnauthorized());
+
+        verifyNoInteractions(this.clinicService);
     }
 
 }
