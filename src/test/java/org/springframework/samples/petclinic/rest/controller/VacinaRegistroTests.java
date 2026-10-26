@@ -75,4 +75,49 @@ class VacinaRegistroTests {
             .andExpect(jsonPath("$.nome").value("Antirrabica"))
             .andExpect(jsonPath("$.validade").value("2027-03-15"));
     }
+
+    // @verifica: CT-060
+    @Test
+    @DisplayName("RN-037 · registro sem o campo nome devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaSemNome() throws Exception {
+        String corpo = """
+            {"validade":"2027-03-15"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
+
+    // @verifica: CT-060
+    @Test
+    @DisplayName("RN-037 · registro com nome vazio devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaComNomeVazio() throws Exception {
+        String corpo = """
+            {"nome":"","validade":"2027-03-15"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
+
+    // @verifica: CT-060
+    @Test
+    @DisplayName("RN-037 · registro com nome so de espacos devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaComNomeSoDeEspacos() throws Exception {
+        String corpo = """
+            {"nome":"   ","validade":"2027-03-15"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
 }
