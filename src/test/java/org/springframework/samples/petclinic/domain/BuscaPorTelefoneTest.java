@@ -2,6 +2,7 @@ package org.springframework.samples.petclinic.domain;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
@@ -87,5 +88,19 @@ class BuscaPorTelefoneTest {
         // a mesma máscara escolhe o mesmo modo que os dígitos puros
         assertTrue(BuscaPorTelefone.de("(608) 555-1023").ehPorTelefoneInteiro());
         assertFalse(BuscaPorTelefone.de("8555-1023").ehPorTelefoneInteiro());
+    }
+
+    // @verifica: CT-109
+    @Test
+    @DisplayName("RN-008 · telefone com 9 dígitos é recusado informando que são 8 ou 10 dígitos")
+    void telefoneComNoveDigitosERecusado() {
+        IllegalArgumentException semMascara = assertThrows(IllegalArgumentException.class,
+                () -> BuscaPorTelefone.de("608555102"));
+        assertTrue(semMascara.getMessage().contains("8 ou 10 dígitos"));
+
+        // a máscara é tirada antes de contar: 9 dígitos com máscara também são recusados
+        IllegalArgumentException comMascara = assertThrows(IllegalArgumentException.class,
+                () -> BuscaPorTelefone.de("(608) 555-102"));
+        assertTrue(comMascara.getMessage().contains("8 ou 10 dígitos"));
     }
 }
