@@ -120,4 +120,19 @@ class VacinaRegistroTests {
                 .content(corpo))
             .andExpect(status().isBadRequest());
     }
+
+    // @verifica: CT-061
+    @Test
+    @DisplayName("RN-037 · registro sem o campo validade devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaSemValidade() throws Exception {
+        String corpo = """
+            {"nome":"Antirrabica"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
 }
