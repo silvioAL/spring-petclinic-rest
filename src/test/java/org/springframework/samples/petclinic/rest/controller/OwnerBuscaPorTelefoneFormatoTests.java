@@ -67,11 +67,15 @@ class OwnerBuscaPorTelefoneFormatoTests {
             String nome = m.getName();
             if ((nome.contains("Telephone") || nome.contains("Telefone"))
                 && java.util.Collection.class.isAssignableFrom(m.getReturnType())) {
-                Object[] args = new Object[m.getParameterCount()];
+                // O stubbing (doReturn...when) vem primeiro; os matchers so sao
+                // criados logo antes da invocacao do metodo no mock, nesta ordem.
+                Object stub = Mockito.doReturn(donos).when(this.clinicService);
+                Class<?>[] tipos = m.getParameterTypes();
+                Object[] args = new Object[tipos.length];
                 for (int i = 0; i < args.length; i++) {
-                    args[i] = ArgumentMatchers.any();
+                    args[i] = ArgumentMatchers.any(tipos[i]);
                 }
-                m.invoke(Mockito.doReturn(donos).when(this.clinicService), args);
+                m.invoke(stub, args);
             }
         }
     }

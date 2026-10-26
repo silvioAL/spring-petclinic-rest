@@ -106,10 +106,14 @@ class OwnerListagemSemTelefoneTests {
 
         Mockito.verify(this.clinicService).findAllOwners();
 
-        Object[] args = new Object[porTelefone.getParameterCount()];
+        // A verificacao (verify) vem primeiro; os matchers so sao criados logo
+        // antes da invocacao do metodo no mock, nesta ordem.
+        Object verificacao = Mockito.verify(this.clinicService, Mockito.never());
+        Class<?>[] tipos = porTelefone.getParameterTypes();
+        Object[] args = new Object[tipos.length];
         for (int i = 0; i < args.length; i++) {
-            args[i] = ArgumentMatchers.any();
+            args[i] = ArgumentMatchers.any(tipos[i]);
         }
-        porTelefone.invoke(Mockito.verify(this.clinicService, Mockito.never()), args);
+        porTelefone.invoke(verificacao, args);
     }
 }
