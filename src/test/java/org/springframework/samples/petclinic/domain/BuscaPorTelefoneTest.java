@@ -65,4 +65,27 @@ class BuscaPorTelefoneTest {
         assertFalse(busca.casa("6085551024"));
         assertFalse(busca.casa("6095551023"));
     }
+
+    // @verifica: CT-106
+    @Test
+    @DisplayName("RN-008 · busca por telefone escolhe inteiro com 10 dígitos e final com 8")
+    void buscaPorTelefoneEscolheInteiroComDezDigitosEFinalComOito() {
+        BuscaPorTelefone inteiro = BuscaPorTelefone.de("6085551023");
+        BuscaPorTelefone final8 = BuscaPorTelefone.de("85551023");
+
+        assertTrue(inteiro.ehPorTelefoneInteiro());
+        assertFalse(final8.ehPorTelefoneInteiro());
+
+        // com 10 dígitos o número tem de ser o mesmo, inclusive o início (DDD)
+        assertTrue(inteiro.casa("6085551023"));
+        assertFalse(inteiro.casa("1185551023"));
+
+        // com 8 dígitos só os 8 últimos contam, o início do cadastrado é livre
+        assertTrue(final8.casa("6085551023"));
+        assertTrue(final8.casa("1185551023"));
+
+        // a mesma máscara escolhe o mesmo modo que os dígitos puros
+        assertTrue(BuscaPorTelefone.de("(608) 555-1023").ehPorTelefoneInteiro());
+        assertFalse(BuscaPorTelefone.de("8555-1023").ehPorTelefoneInteiro());
+    }
 }
