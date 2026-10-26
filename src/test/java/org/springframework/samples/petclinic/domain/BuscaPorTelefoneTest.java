@@ -1,0 +1,24 @@
+package org.springframework.samples.petclinic.domain;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+/**
+ * Domínio sem framework: a busca de donos por telefone (SPEC-001, seções 2.1 e 5).
+ */
+class BuscaPorTelefoneTest {
+
+    // @verifica: CT-102
+    @Test
+    @DisplayName("RN-008 · telefone de 10 dígitos casa pelo telefone inteiro e devolve o dono")
+    void telefoneDeDezDigitosCasaPeloTelefoneInteiro() {
+        BuscaPorTelefone busca = BuscaPorTelefone.de("6085551023");
+
+        assertEquals("6085551023", busca.digitos());
+        assertTrue(busca.ehPorTelefoneInteiro());
+        assertTrue(busca.casa("6085551023"));
+    }
+}
