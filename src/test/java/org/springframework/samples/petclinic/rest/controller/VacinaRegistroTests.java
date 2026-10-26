@@ -165,4 +165,20 @@ class VacinaRegistroTests {
                 .content(corpo))
             .andExpect(status().isBadRequest());
     }
+
+    // @verifica: CT-063
+    @Test
+    @DisplayName("RN-023 · registro de vacina para pet inexistente devolve 404")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaParaPetInexistente() throws Exception {
+        given(this.clinicService.findPetById(99)).willReturn(null);
+        String corpo = """
+            {"nome":"Antirrabica","validade":"2027-03-15"}""";
+
+        this.mockMvc.perform(post("/api/pets/99/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isNotFound());
+    }
 }
