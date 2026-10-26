@@ -21,4 +21,19 @@ class BuscaPorTelefoneTest {
         assertTrue(busca.ehPorTelefoneInteiro());
         assertTrue(busca.casa("6085551023"));
     }
+
+    // @verifica: CT-103
+    @Test
+    @DisplayName("RN-008 · espaço, parênteses, hífen e ponto são ignorados ao normalizar o telefone")
+    void mascaraEIgnoradaAoNormalizarOTelefone() {
+        BuscaPorTelefone comParenteses = BuscaPorTelefone.de("(608) 555-1023");
+        BuscaPorTelefone comPontos = BuscaPorTelefone.de("608.555.1023");
+        BuscaPorTelefone comEspacos = BuscaPorTelefone.de(" 608 555 1023 ");
+
+        assertEquals("6085551023", comParenteses.digitos());
+        assertEquals("6085551023", comPontos.digitos());
+        assertEquals("6085551023", comEspacos.digitos());
+        assertTrue(comParenteses.ehPorTelefoneInteiro());
+        assertTrue(comParenteses.casa("6085551023"));
+    }
 }
