@@ -51,4 +51,18 @@ class BuscaPorTelefoneTest {
         assertTrue(comMascara.casa(telefoneCadastrado));
         assertFalse(comMascara.casa("6085551024"));
     }
+
+    // @verifica: CT-105
+    @Test
+    @DisplayName("RN-008 · 8 dígitos casam pelos 8 últimos dígitos do telefone cadastrado")
+    void oitoDigitosCasamPelosOitoUltimosDoTelefoneCadastrado() {
+        BuscaPorTelefone busca = BuscaPorTelefone.de("85551023");
+
+        assertEquals("85551023", busca.digitos());
+        assertFalse(busca.ehPorTelefoneInteiro());
+        assertTrue(busca.casa("6085551023"));
+        assertTrue(busca.casa("1185551023"));
+        assertFalse(busca.casa("6085551024"));
+        assertFalse(busca.casa("6095551023"));
+    }
 }
