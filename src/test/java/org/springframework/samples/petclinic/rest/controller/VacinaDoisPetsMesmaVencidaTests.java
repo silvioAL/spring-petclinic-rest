@@ -53,10 +53,10 @@ class VacinaDoisPetsMesmaVencidaTests {
     @Test
     @DisplayName("RN-035 · dois pets com a mesma vacina vencida aparecem cada um com o telefone do seu dono")
     void doisPetsComAMesmaVacinaVencidaApareceCadaUmComOTelefoneDoSeuDono() throws Exception {
-        // pet 1 e dono 1; pet 3 e dono 2 (massa de dados do petclinic): donos diferentes
+        // pet 1 e do dono 1; pet 3 e do dono 3 (massa de dados do petclinic): donos diferentes
         String telefoneDono1 = telefoneDoDono(1);
-        String telefoneDono2 = telefoneDoDono(2);
-        assertTrue(!telefoneDono1.equals(telefoneDono2), "a massa deve ter donos com telefones diferentes");
+        String telefoneDono3 = telefoneDoDono(3);
+        assertTrue(!telefoneDono1.equals(telefoneDono3), "a massa deve ter donos com telefones diferentes");
 
         String vencida = LocalDate.now().minusDays(5).toString();
         String corpo = """
@@ -80,7 +80,7 @@ class VacinaDoisPetsMesmaVencidaTests {
             "$..[?(@.vacinaNome == '" + NOME_DA_VACINA + "')].donoTelefone");
         assertEquals(2, telefones.size(), "os dois pets devem aparecer com a vacina vencida");
         assertTrue(telefones.contains(telefoneDono1), "falta o telefone do dono do pet 1");
-        assertTrue(telefones.contains(telefoneDono2), "falta o telefone do dono do pet 3");
+        assertTrue(telefones.contains(telefoneDono3), "falta o telefone do dono do pet 3");
     }
 
     private String telefoneDoDono(int donoId) throws Exception {
