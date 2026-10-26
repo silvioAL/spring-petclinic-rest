@@ -20,6 +20,7 @@ import java.util.Collection;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.BaseEntity;
 import org.springframework.samples.petclinic.model.Owner;
 
@@ -46,6 +47,17 @@ public interface OwnerRepository {
     Collection<Owner> findByLastName(String lastName) throws DataAccessException;
 
     Page<Owner> findByLastName(String lastName, Pageable pageable) throws DataAccessException;
+
+    /**
+     * Retrieve <code>Owner</code>s from the data store by telephone, ordered by id: with a 10-digit search the
+     * telephone must be the same; with an 8-digit search the last 8 digits of the telephone must be the same.
+     * Owners without pets are returned too.
+     *
+     * @param busca the telephone search (digits only, 8 or 10)
+     * @return a <code>Collection</code> of matching <code>Owner</code>s (or an empty <code>Collection</code> if none
+     * found)
+     */
+    Collection<Owner> findByTelephone(BuscaPorTelefone busca) throws DataAccessException;
 
     /**
      * Retrieve an <code>Owner</code> from the data store by id.

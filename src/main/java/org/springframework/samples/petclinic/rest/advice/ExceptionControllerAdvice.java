@@ -28,6 +28,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.samples.petclinic.domain.TelefoneInvalidoException;
 import org.springframework.samples.petclinic.rest.controller.BindingErrorsResponse;
 import org.springframework.samples.petclinic.rest.dto.ValidationMessageDto;
 import org.springframework.validation.BindingResult;
@@ -104,6 +105,24 @@ public class ExceptionControllerAdvice {
         logger.debug("Data integrity violation stacktrace", e);
         HttpStatus status = HttpStatus.NOT_FOUND;
         ProblemDetail detail = this.detailBuild(e, status, request.getRequestURL(), ERROR_DATA_INTEGRITY);
+        return ResponseEntity.status(status).body(detail);
+    }
+
+    /**
+     * Handles {@link TelefoneInvalidoException}, thrown when the phone number of an owner search has a size other
+     * than 8 or 10 digits or has characters that are neither digits nor mask. The message of the exception, which
+     * states the expected size, is returned to the client.
+     *
+     * @param e The {@link TelefoneInvalidoException} to be handled
+     * @param request {@link HttpServletRequest} object referring to the current request.
+     * @return A {@link ResponseEntity} containing the error information and a 400 Bad Request status
+     */
+    @ExceptionHandler(TelefoneInvalidoException.class)
+    @ResponseBody
+    public ResponseEntity<ProblemDetail> handleTelefoneInvalidoException(TelefoneInvalidoException e, HttpServletRequest request) {
+        logger.debug("Invalid phone number at {} {}: {}", request.getMethod(), request.getRequestURI(), e.getMessage());
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ProblemDetail detail = this.detailBuild(e, status, request.getRequestURL(), e.getMessage());
         return ResponseEntity.status(status).body(detail);
     }
 

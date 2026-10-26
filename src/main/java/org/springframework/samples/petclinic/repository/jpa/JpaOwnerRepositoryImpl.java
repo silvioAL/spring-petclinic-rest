@@ -28,6 +28,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.repository.OwnerRepository;
 import org.springframework.stereotype.Repository;
@@ -77,6 +78,21 @@ public class JpaOwnerRepositoryImpl implements OwnerRepository {
         countQuery.setParameter("lastName", lastName + "%");
         long total = (long) countQuery.getSingleResult();
         return new PageImpl<>(owners, pageable, total);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<Owner> findByTelephone(BuscaPorTelefone busca) throws DataAccessException {
+        // 'left join fetch' because an owner without pets must still be found
+        Query query;
+        if (busca.ehPorTelefoneInteiro()) {
+            query = this.em.createQuery("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.telephone = :telephone ORDER BY owner.id");
+            query.setParameter("telephone", busca.digitos());
+        } else {
+            query = this.em.createQuery("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.telephone LIKE :telephone ORDER BY owner.id");
+            query.setParameter("telephone", "%" + busca.digitos());
+        }
+        return query.getResultList();
     }
 
     @Override

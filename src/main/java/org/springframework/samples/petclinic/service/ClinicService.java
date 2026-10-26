@@ -22,6 +22,7 @@ import java.util.Set;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
@@ -59,6 +60,7 @@ public interface ClinicService {
 	void saveOwner(Owner owner) throws DataAccessException;
 	void deleteOwner(Owner owner) throws DataAccessException;
 	Collection<Owner> findOwnerByLastName(String lastName) throws DataAccessException;
+	Collection<Owner> findOwnersByTelephone(BuscaPorTelefone busca) throws DataAccessException;
 
 	PetType findPetTypeById(int petTypeId);
 	Collection<PetType> findAllPetTypes() throws DataAccessException;

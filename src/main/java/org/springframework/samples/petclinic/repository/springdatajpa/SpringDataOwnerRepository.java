@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.repository.OwnerRepository;
 
@@ -45,6 +46,19 @@ public interface SpringDataOwnerRepository extends OwnerRepository, Repository<O
         value = "SELECT owner FROM Owner owner WHERE owner.lastName LIKE CONCAT(:lastName, '%')",
         countQuery = "SELECT COUNT(owner) FROM Owner owner WHERE owner.lastName LIKE CONCAT(:lastName, '%')")
     Page<Owner> findByLastName(@Param("lastName") String lastName, Pageable pageable);
+
+    @Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.telephone = :telephone ORDER BY owner.id")
+    Collection<Owner> buscarPorTelefoneInteiro(@Param("telephone") String telephone);
+
+    @Query("SELECT DISTINCT owner FROM Owner owner left join fetch owner.pets WHERE owner.telephone LIKE CONCAT('%', :ending) ORDER BY owner.id")
+    Collection<Owner> buscarPorFinalDoTelefone(@Param("ending") String ending);
+
+    @Override
+    default Collection<Owner> findByTelephone(BuscaPorTelefone busca) {
+        return busca.ehPorTelefoneInteiro()
+            ? buscarPorTelefoneInteiro(busca.digitos())
+            : buscarPorFinalDoTelefone(busca.digitos());
+    }
 
     @Override
     @Query(

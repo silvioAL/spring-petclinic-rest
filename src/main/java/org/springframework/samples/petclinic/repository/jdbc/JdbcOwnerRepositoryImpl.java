@@ -26,6 +26,7 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.model.Pet;
 import org.springframework.samples.petclinic.model.PetType;
@@ -109,6 +110,31 @@ public class JdbcOwnerRepositoryImpl implements OwnerRepository {
             Long.class
         );
         return new PageImpl<>(owners, pageable, total == null ? 0 : total);
+    }
+
+    /**
+     * Loads {@link Owner Owners} from the data store by telephone, ordered by id: a 10-digit search matches the
+     * whole telephone and an 8-digit search matches the last 8 digits; also loads the {@link Pet Pets} and
+     * {@link Visit Visits} of the owners. Owners without pets are returned too.
+     */
+    @Override
+    public Collection<Owner> findByTelephone(BuscaPorTelefone busca) throws DataAccessException {
+        Map<String, Object> params = new HashMap<>();
+        String where;
+        if (busca.ehPorTelefoneInteiro()) {
+            where = "telephone = :telephone";
+            params.put("telephone", busca.digitos());
+        } else {
+            where = "telephone like :telephone";
+            params.put("telephone", "%" + busca.digitos());
+        }
+        List<Owner> owners = this.namedParameterJdbcTemplate.query(
+            "SELECT id, first_name, last_name, address, city, telephone FROM owners WHERE " + where + " ORDER BY id",
+            params,
+            BeanPropertyRowMapper.newInstance(Owner.class)
+        );
+        loadOwnersPetsAndVisits(owners);
+        return owners;
     }
 
     /**

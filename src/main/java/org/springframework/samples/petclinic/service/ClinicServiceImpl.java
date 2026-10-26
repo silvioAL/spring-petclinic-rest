@@ -20,6 +20,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectRetrievalFailureException;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.model.*;
 import org.springframework.samples.petclinic.repository.*;
 import org.springframework.stereotype.Service;
@@ -240,6 +241,12 @@ public class ClinicServiceImpl implements ClinicService {
     @Transactional(readOnly = true)
     public Collection<Owner> findOwnerByLastName(String lastName) throws DataAccessException {
         return ownerRepository.findByLastName(lastName);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Collection<Owner> findOwnersByTelephone(BuscaPorTelefone busca) throws DataAccessException {
+        return ownerRepository.findByTelephone(busca);
     }
 
     @Override

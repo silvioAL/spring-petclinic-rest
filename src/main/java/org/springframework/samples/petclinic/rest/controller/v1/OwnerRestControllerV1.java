@@ -21,7 +21,9 @@ import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.samples.petclinic.domain.BuscaPorTelefone;
 import org.springframework.samples.petclinic.mapper.OwnerMapper;
 import org.springframework.samples.petclinic.mapper.PetMapper;
 import org.springframework.samples.petclinic.mapper.VisitMapper;
@@ -38,7 +40,9 @@ import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.samples.petclinic.service.ClinicService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -83,6 +87,24 @@ public class OwnerRestControllerV1 implements OwnersApi {
         if (owners.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(ownerMapper.toOwnerDtoCollection(owners), HttpStatus.OK);
+    }
+
+    /**
+     * Busca de donos por telefone (SPEC-001): GET /api/owners?telefone=... Quando o parâmetro telefone vem, ele
+     * prevalece sobre o sobrenome. Sem dono que case, responde 200 com lista vazia; telefone com tamanho diferente
+     * de 8 e 10 dígitos, ou com caractere que não é dígito nem máscara, responde 400 (ExceptionControllerAdvice).
+     */
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @GetMapping(value = "/owners", params = "telefone", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<OwnerDto>> listOwnersByTelephone(
+        @RequestParam("telefone") String telefone,
+        @RequestParam(value = "lastName", required = false) String lastName) {
+        if (telefone.isBlank()) {
+            return listOwners(lastName);
+        }
+        BuscaPorTelefone busca = BuscaPorTelefone.de(telefone);
+        Collection<Owner> owners = this.clinicService.findOwnersByTelephone(busca);
         return new ResponseEntity<>(ownerMapper.toOwnerDtoCollection(owners), HttpStatus.OK);
     }
 
