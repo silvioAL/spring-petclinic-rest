@@ -135,4 +135,34 @@ class VacinaRegistroTests {
                 .content(corpo))
             .andExpect(status().isBadRequest());
     }
+
+    // @verifica: CT-062
+    @Test
+    @DisplayName("RN-037 · registro com validade fora do formato yyyy-MM-dd devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaComValidadeEmFormatoInvalido() throws Exception {
+        String corpo = """
+            {"nome":"Antirrabica","validade":"15/03/2027"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
+
+    // @verifica: CT-062
+    @Test
+    @DisplayName("RN-037 · registro com validade que nao e data devolve 400")
+    @WithMockUser(roles = "VET_ADMIN")
+    void recusaVacinaComValidadeQueNaoEData() throws Exception {
+        String corpo = """
+            {"nome":"Antirrabica","validade":"amanha"}""";
+
+        this.mockMvc.perform(post("/api/pets/3/vacinas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(corpo))
+            .andExpect(status().isBadRequest());
+    }
 }
