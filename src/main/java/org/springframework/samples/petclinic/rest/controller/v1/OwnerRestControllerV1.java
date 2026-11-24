@@ -36,8 +36,11 @@ import org.springframework.samples.petclinic.rest.dto.PetFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.VisitDto;
 import org.springframework.samples.petclinic.rest.dto.VisitFieldsDto;
 import org.springframework.samples.petclinic.service.ClinicService;
+import org.springframework.samples.petclinic.service.ResumoDeVisitas;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -94,6 +97,16 @@ public class OwnerRestControllerV1 implements OwnersApi {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(ownerMapper.toOwnerDto(owner), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
+    @GetMapping(value = "/owners/{ownerId}/visits/summary", produces = "application/json")
+    public ResponseEntity<ResumoDeVisitas> getOwnerVisitsSummary(@PathVariable("ownerId") Integer ownerId) {
+        Owner owner = this.clinicService.findOwnerById(ownerId);
+        if (owner == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(ResumoDeVisitas.de(owner), HttpStatus.OK);
     }
 
     @PreAuthorize("hasRole(@roles.OWNER_ADMIN)")
