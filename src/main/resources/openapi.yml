@@ -359,6 +359,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetail'
+  /owners/{ownerId}/visits/summary:
+    get:
+      tags:
+        - owners
+      operationId: getOwnerVisitsSummary
+      summary: Get the visits summary of a pet owner
+      description: Returns the total of visits, the date of the latest one and the visits of each pet of the owner, or a 404 error.
+      parameters:
+        - name: ownerId
+          in: path
+          description: The ID of the pet owner.
+          required: true
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            example: 1
+      responses:
+        200:
+          description: Visits summary of the owner returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OwnerVisitsSummary'
+        404:
+          description: Owner not found.
   /owners/{ownerId}/pets:
     post:
       tags:
@@ -1897,6 +1923,69 @@ paths:
                 $ref: '#/components/schemas/ProblemDetail'
 components:
   schemas:
+    OwnerVisitsSummary:
+      title: Owner visits summary
+      description: The visits of all the pets of an owner, summarized.
+      type: object
+      properties:
+        ownerId:
+          title: Owner ID
+          description: The ID of the pet owner.
+          type: integer
+          format: int32
+          example: 1
+        total:
+          title: Total
+          description: The total of visits of the pets of the owner.
+          type: integer
+          format: int32
+          minimum: 0
+          example: 2
+        ultimaVisita:
+          title: Latest visit
+          description: The date of the latest visit, null when there is no visit.
+          type: string
+          format: date
+          nullable: true
+          example: '2013-01-04'
+        porPet:
+          title: Visits by pet
+          description: All the pets of the owner sorted by name, including the ones without visits.
+          type: array
+          items:
+            $ref: '#/components/schemas/PetVisitsSummary'
+      required:
+        - ownerId
+        - total
+        - ultimaVisita
+        - porPet
+    PetVisitsSummary:
+      title: Pet visits summary
+      description: The number of visits of a pet.
+      type: object
+      properties:
+        petId:
+          title: Pet ID
+          description: The ID of the pet.
+          type: integer
+          format: int32
+          example: 7
+        nome:
+          title: Name
+          description: The name of the pet.
+          type: string
+          example: Samantha
+        visitas:
+          title: Visits
+          description: The number of visits of the pet.
+          type: integer
+          format: int32
+          minimum: 0
+          example: 2
+      required:
+        - petId
+        - nome
+        - visitas
     ProblemDetail:
       title: Problem Detail
       description: The schema for all error responses.

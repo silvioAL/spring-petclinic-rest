@@ -8,6 +8,8 @@ import org.springframework.samples.petclinic.model.Owner;
 import org.springframework.samples.petclinic.rest.dto.OwnerDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerFieldsDto;
 import org.springframework.samples.petclinic.rest.dto.OwnerPageDto;
+import org.springframework.samples.petclinic.rest.dto.OwnerVisitsSummaryDto;
+import org.springframework.samples.petclinic.service.ResumoDeVisitas;
 
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +31,8 @@ public interface OwnerMapper {
     List<OwnerDto> toOwnerDtoCollection(Collection<Owner> ownerCollection);
 
     Collection<Owner> toOwners(Collection<OwnerDto> ownerDtos);
+
+    OwnerVisitsSummaryDto toOwnerVisitsSummaryDto(ResumoDeVisitas resumo);
 
     default OwnerPageDto toOwnerPageDto(@NonNull Page<Owner> ownerPage) {
         OwnerPageDto ownerPageDto = new OwnerPageDto();
